@@ -1,0 +1,11 @@
+[Unit]
+Description=Monitoring service Edimax smart plugs
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/vagrant/ediplug-monitor
+WorkingDirectory=/vagrant
+
+[Install]
+WantedBy=multi-user.target

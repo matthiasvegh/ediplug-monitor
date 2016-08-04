@@ -1,0 +1,16 @@
+#!/usr/bin/env python3
+
+import sys
+import time
+
+def log(*args, **kwargs):
+	print(*args, **kwargs)
+	sys.stdout.flush()
+
+def main():
+	while True:
+		time.sleep(1)
+		log("Still here")
+
+if __name__ == "__main__":
+	main()
