@@ -19,10 +19,22 @@ plug_user="admin"
 plug_password="1234"
 plug_refresh_rate=5
 
+
+class StatisticsWriter(object):
+	def __init__(self):
+		self.output_file = open("data.csv", 'a')
+
+	def add_measurements(self, measurements):
+		datas = str.join(" ",
+			[str(measurement) for measurement in measurements])
+		self.output_file.write(str(time.time())+" "+datas+"\n")
+
+
 def main():
+	writer = StatisticsWriter()
 	while True:
 		plug = smartplug.SmartPlug(plug_ip, (plug_user, plug_password))
-		log(plug.state, plug.power+"w")
+		writer.add_measurements([plug.power])
 		time.sleep(plug_refresh_rate)
 
 if __name__ == "__main__":
