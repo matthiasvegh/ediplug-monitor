@@ -4,9 +4,14 @@
 Vagrant.configure("2") do |config|
   config.vm.box = "bento/debian-8.5"
 
+  if Vagrant.has_plugin?("vagrant-cachier")
+    config.cache.scope = :box
+  end
+
   config.vm.provision "shell", inline: <<-SHELL
     apt-get update
-    apt-get --yes install python3
+    apt-get --yes install python3 python3-pip
+    pip3 install requests
   SHELL
 
   config.vm.provision "file",

@@ -1,7 +1,14 @@
 #!/usr/bin/env python3
 
+import os
 import sys
 import time
+
+sys.path.append(os.path.join(
+	os.path.dirname(__file__),
+	"ediplug-py", "src", "ediplug"))
+
+import smartplug
 
 def log(*args, **kwargs):
 	print(*args, **kwargs)
