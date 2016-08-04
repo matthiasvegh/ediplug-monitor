@@ -22,7 +22,7 @@ plug_refresh_rate=5
 
 class StatisticsWriter(object):
 	def __init__(self):
-		self.output_file = open("data.csv", 'a')
+		self.output_file = open("data.csv", 'a', 1)
 
 	def add_measurements(self, measurements):
 		datas = str.join(" ",
