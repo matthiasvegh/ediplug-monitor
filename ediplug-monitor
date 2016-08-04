@@ -14,10 +14,16 @@ def log(*args, **kwargs):
 	print(*args, **kwargs)
 	sys.stdout.flush()
 
+plug_ip="192.168.1.80"
+plug_user="admin"
+plug_password="1234"
+plug_refresh_rate=5
+
 def main():
 	while True:
-		time.sleep(1)
-		log("Still here")
+		plug = smartplug.SmartPlug(plug_ip, (plug_user, plug_password))
+		log(plug.state, plug.power+"w")
+		time.sleep(plug_refresh_rate)
 
 if __name__ == "__main__":
 	main()
