@@ -1,6 +1,7 @@
 [Unit]
 Description=Monitoring service Edimax smart plugs
-After=network.target
+After=network.target vboxadd.service
+Requires=vboxadd.service
 
 [Service]
 Type=simple
