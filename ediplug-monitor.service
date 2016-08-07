@@ -1,10 +1,10 @@
 [Unit]
 Description=Monitoring service Edimax smart plugs
-After=network.target vboxadd.service
-Requires=vboxadd.service
+After=network.target
 
 [Service]
 Type=simple
+ExecStartPre=/bin/bash -c "while [ ! -f /vagrant/ediplug-monitor ]; do sleep 1; done"
 ExecStart=/vagrant/ediplug-monitor
 WorkingDirectory=/vagrant
 

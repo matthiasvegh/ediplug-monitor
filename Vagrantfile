@@ -28,4 +28,8 @@ Vagrant.configure("2") do |config|
     systemctl start ediplug-monitor.service
   SHELL
 
+  config.vm.provision "shell",
+    inline: "systemctl status ediplug-monitor.service",
+    run: "always"
+
 end
