@@ -11,7 +11,7 @@ Vagrant.configure("2") do |config|
   config.vm.provision "shell", inline: <<-SHELL
     apt-get update
     apt-get --yes install python3 python3-pip
-    pip3 install requests tornado toro
+    pip3 install requests thriftpy tornado toro
   SHELL
 
   config.vm.provision "file",
