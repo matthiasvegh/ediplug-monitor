@@ -35,6 +35,8 @@ class EdiplugServer(tornado.web.RequestHandler):
 			ediplug_thrift.Ediplug, '127.0.0.1', 6000)
 		measurements = yield client.getConsumptionBetween(begin_, end_)
 		client.close()
+		measurements.sort(
+			key=lambda measurement: measurement.timepoint.epoch)
 		self.write("Measurements begin:<br>")
 		for measurement in measurements:
 			self.write(
