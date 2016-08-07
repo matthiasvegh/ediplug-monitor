@@ -3,6 +3,8 @@
 import os
 import sys
 import time
+import tornado
+import tornado.ioloop
 
 sys.path.append(os.path.join(
 	os.path.dirname(__file__),
@@ -30,13 +32,26 @@ class StatisticsWriter(object):
 		self.output_file.write(str(time.time())+" "+datas+"\n")
 
 
-def main():
-	log("Starting backend")
-	writer = StatisticsWriter()
-	while True:
+class Backend(object):
+	def __init__(self):
+		self.writer = StatisticsWriter()
+		log("Starting backend")
+		self.ioloop = tornado.ioloop.IOLoop.current()
+		self.measurementTask = tornado.ioloop.PeriodicCallback(
+			self.getMeasurements, plug_refresh_rate*1000)
+
+	def getMeasurements(self):
 		plug = smartplug.SmartPlug(plug_ip, (plug_user, plug_password))
-		writer.add_measurements([plug.power])
-		time.sleep(plug_refresh_rate)
+		self.writer.add_measurements([plug.power])
+
+	def run(self):
+		self.measurementTask.start()
+		self.ioloop.start()
+
+
+def main():
+	backend = Backend()
+	backend.run()
 
 if __name__ == "__main__":
 	main()
