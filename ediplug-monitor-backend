@@ -38,17 +38,29 @@ configuration = {
 class StatisticsWriter(object):
 	def __init__(self):
 		self.output_file = open("data.csv", 'a', 1)
-		self.latest_measurements = [0.0]
+		# TODO: read file to get data
+		self.measurements = {
+			time.time(): [0.0 for plug in configuration["plugs"]]
+		}
 
 	def add_measurements(self, measurements):
-		self.latest_measurements = measurements
+		timepoint = time.time()
+		self.measurements[timepoint] = measurements
 		datas = str.join(" ",
 			[str(measurement) for measurement in measurements])
 		self.output_file.write(str(time.time())+" "+datas+"\n")
 
-	def get_latest_measurements(self):
-		return self.latest_measurements
 
+	def get_latest_measurements(self):
+		latestTime = max(self.measurements.keys())
+		return self.measurements[latestTime]
+
+	def get_measurements_between(self, begin, end):
+		result = []
+		for measurementTime, measurementValues in self.measurements.items():
+			if begin <= measurementTime <= end:
+				result.append((measurementTime, measurementValues))
+		return result
 
 class Backend(object):
 	def __init__(self):
@@ -68,13 +80,29 @@ class Backend(object):
 			for plug in configuration["plugs"].values()]
 		self.writer.add_measurements([float(plug.power) for plug in plugs])
 
+	def getConsumptionBetween(self, begin, end):
+		result = []
+		measurementses = self.writer.get_measurements_between(
+			begin.epoch, end.epoch)
+		for measurementTime, measurementValues in measurementses:
+			for measurementValue, plugName in zip(
+					measurementValues, configuration["plugs"]):
+				result.append(ediplug_thrift.Measurement(
+					plugName,
+					ediplug_thrift.Timepoint(measurementTime),
+					ediplug_thrift.Consumption(measurementValue)))
+		return result
+
 	@tornado.gen.coroutine
 	def checkServer(self):
 		client = yield thriftpy.tornado.make_client(
 			ediplug_thrift.Ediplug, '127.0.0.1', 6000)
 		result = yield client.getCurrentConsumption()
-		client.close()
 		assert(result == self.getCurrentConsumption())
+		result = yield client.getConsumptionBetween(
+			ediplug_thrift.Timepoint(time.time() - 60),
+			ediplug_thrift.Timepoint(time.time()))
+		client.close()
 
 	def getCurrentConsumption(self):
 		currentConsumption = self.writer.get_latest_measurements()[0]

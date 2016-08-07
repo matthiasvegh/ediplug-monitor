@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import time
 import tornado
 import tornado.web
 import tornado.httpserver
@@ -25,10 +26,26 @@ class EdiplugServer(tornado.web.RequestHandler):
 
 	@tornado.gen.coroutine
 	def get(self):
+		end = time.time()
+		dayInSeconds = 24*60*60
+		begin = end - dayInSeconds
+		begin_ = ediplug_thrift.Timepoint(begin)
+		end_ = ediplug_thrift.Timepoint(end)
 		client = yield thriftpy.tornado.make_client(
 			ediplug_thrift.Ediplug, '127.0.0.1', 6000)
-		currentConsumption = yield client.getCurrentConsumption()
-		self.write(str(currentConsumption)+"W")
+		measurements = yield client.getConsumptionBetween(begin_, end_)
+		client.close()
+		self.write("Measurements begin:<br>")
+		for measurement in measurements:
+			self.write(
+				measurement.plugName+
+				": "+
+				str(measurement.timepoint.epoch)+
+				": "+
+				str(measurement.consumption.watts)+
+				"W<br>")
+		self.write("Measurements end<br>")
+
 
 
 def main():
