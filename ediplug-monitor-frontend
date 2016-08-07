@@ -11,22 +11,38 @@ def log(*args, **kwargs):
 	print(*args, **kwargs)
 	sys.stdout.flush()
 
-class ediplugServer(tornado.web.RequestHandler):
+class FileView(object):
+	def __init__(self, filename):
+		self.data = open(filename, "rb", 1)
+
+	def getLastLine(self):
+		self.data.seek(-3, 2)
+		while True:
+			currentChar = self.data.read(1)
+			if currentChar == b"\n":
+				break
+			self.data.seek(-2, 1)
+		measurementLine = self.data.readline()
+		return measurementLine
+
+
+class EdiplugServer(tornado.web.RequestHandler):
 
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 		self.ioloop = tornado.ioloop.IOLoop.current()
+		self.fileView = FileView("data.csv")
 
 	@tornado.gen.coroutine
 	def get(self):
-		self.write("Hello before delay\n")
-		yield tornado.gen.Task(self.ioloop.call_later, 1)
-		self.write("Hello delayed world\n")
+		line = self.fileView.getLastLine()
+		self.write(line)
+
 
 def main():
 	log("Starting web server")
 	application = tornado.web.Application(
-			[(r"/", ediplugServer)])
+			[(r"/", EdiplugServer)])
 	application.listen(8888)
 	tornado.ioloop.IOLoop.current().start()
 
