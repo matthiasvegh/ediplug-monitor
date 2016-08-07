@@ -8,6 +8,8 @@ Vagrant.configure("2") do |config|
     config.cache.scope = :box
   end
 
+  config.vm.network "forwarded_port", guest: "8888", host: "8888"
+
   config.vm.provision "shell", inline: <<-SHELL
     apt-get update
     apt-get --yes install python3 python3-pip
