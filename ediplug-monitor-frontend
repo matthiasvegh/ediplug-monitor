@@ -14,7 +14,7 @@ import ediplug_thrift
 
 
 def log(*args, **kwargs):
-	print(*args, **kwargs)
+	print("frontend:", *args, **kwargs)
 	sys.stdout.flush()
 
 class EdiplugServer(tornado.web.RequestHandler):

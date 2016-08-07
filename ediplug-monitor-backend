@@ -19,7 +19,7 @@ sys.path.append(os.path.join(
 import smartplug
 
 def log(*args, **kwargs):
-	print(*args, **kwargs)
+	print("backend:", *args, **kwargs)
 	sys.stdout.flush()
 
 plug_ip="192.168.1.80"
@@ -31,11 +31,16 @@ plug_refresh_rate=5
 class StatisticsWriter(object):
 	def __init__(self):
 		self.output_file = open("data.csv", 'a', 1)
+		self.latest_measurements = [0.0]
 
 	def add_measurements(self, measurements):
+		self.latest_measurements = measurements
 		datas = str.join(" ",
 			[str(measurement) for measurement in measurements])
 		self.output_file.write(str(time.time())+" "+datas+"\n")
+
+	def get_latest_measurements(self):
+		return self.latest_measurements
 
 
 class Backend(object):
@@ -52,7 +57,7 @@ class Backend(object):
 
 	def getMeasurements(self):
 		plug = smartplug.SmartPlug(plug_ip, (plug_user, plug_password))
-		self.writer.add_measurements([plug.power])
+		self.writer.add_measurements([float(plug.power)])
 
 	@tornado.gen.coroutine
 	def checkServer(self):
@@ -63,7 +68,8 @@ class Backend(object):
 		assert(result == self.getCurrentConsumption())
 
 	def getCurrentConsumption(self):
-		return 0.0
+		currentConsumption = self.writer.get_latest_measurements()[0]
+		return currentConsumption
 
 	def run(self):
 		self.measurementTask.start()
